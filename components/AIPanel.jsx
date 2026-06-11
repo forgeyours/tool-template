@@ -8,10 +8,8 @@
 //               stored in their browser only, never our servers.
 // DEPENDENCIES: lib/aiClient.js, lucide-react
 // ⚠️ DO NOT CHANGE: ai-panel class names — defined in globals.css
-//                   API key is stored in localStorage only —
-//                   never send to any ForgeYours endpoint
-//                   toolContext prop must be set by each tool —
-//                   it is what makes the AI tool-aware
+//                   API key is stored in localStorage only
+//                   toolContext prop must be set by each tool
 // ============================================================
 
 'use client';
@@ -23,7 +21,6 @@ import {
   hasApiKey,
   saveApiKey,
   clearApiKey,
-  getApiKey,
 } from '@/lib/aiClient';
 
 export default function AIPanel({ open, onClose, toolContext }) {
@@ -33,15 +30,13 @@ export default function AIPanel({ open, onClose, toolContext }) {
   const [error, setError] = useState(null);
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [keyInput, setKeyInput] = useState('');
-  const [keysaved, setKeySaved] = useState(false);
+  const [apiKeySaved, setApiKeySaved] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Check if key exists on mount
   useEffect(() => {
-    setKeySaved(hasApiKey());
+    setApiKeySaved(hasApiKey());
   }, []);
 
-  // Scroll to bottom when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
@@ -49,7 +44,7 @@ export default function AIPanel({ open, onClose, toolContext }) {
   function handleSaveKey() {
     if (!keyInput.trim()) return;
     saveApiKey(keyInput.trim());
-    setKeySaved(true);
+    setApiKeySaved(true);
     setShowKeyInput(false);
     setKeyInput('');
     setError(null);
@@ -57,7 +52,7 @@ export default function AIPanel({ open, onClose, toolContext }) {
 
   function handleClearKey() {
     clearApiKey();
-    setKeySaved(false);
+    setApiKeySaved(false);
     setMessages([]);
   }
 
@@ -77,12 +72,10 @@ export default function AIPanel({ open, onClose, toolContext }) {
         messages: newMessages,
         toolContext,
       });
-
       setMessages([
         ...newMessages,
         { role: 'assistant', content: reply },
       ]);
-
     } catch (err) {
       if (err.message === 'NO_API_KEY') {
         setError('No API key found. Add your Anthropic API key below.');
@@ -114,18 +107,14 @@ export default function AIPanel({ open, onClose, toolContext }) {
       <div className="ai-panel-header">
         <span>✦ AI Assistant</span>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-
-          {/* API key management */}
           <button
             onClick={() => setShowKeyInput(!showKeyInput)}
-            title={keySaved ? 'API key saved — click to manage' : 'Add API key'}
+            title={apiKeySaved ? 'API key saved — click to manage' : 'Add API key'}
             style={{
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: keysaved
-                ? 'var(--success)'
-                : 'var(--text-muted)',
+              color: apiKeySaved ? 'var(--success)' : 'var(--text-muted)',
               display: 'flex',
               alignItems: 'center',
             }}
@@ -133,7 +122,7 @@ export default function AIPanel({ open, onClose, toolContext }) {
             <Key size={14} />
           </button>
 
-          {keySaved && (
+          {apiKeySaved && (
             <button
               onClick={handleClearKey}
               title="Remove API key"
@@ -179,8 +168,7 @@ export default function AIPanel({ open, onClose, toolContext }) {
             margin: '0 0 8px 0',
             lineHeight: 1.5,
           }}>
-            Your Anthropic API key. Stored in your browser only —
-            never sent to ForgeYours servers.
+            Your Anthropic API key. Stored in your browser only.
             Get one at{' '}
             <a
               href="https://console.anthropic.com"
@@ -221,8 +209,6 @@ export default function AIPanel({ open, onClose, toolContext }) {
 
       {/* ─── MESSAGES ─────────────────────────────────────────── */}
       <div className="ai-panel-messages">
-
-        {/* Empty state */}
         {messages.length === 0 && !error && (
           <div style={{
             textAlign: 'center',
@@ -233,7 +219,7 @@ export default function AIPanel({ open, onClose, toolContext }) {
           }}>
             <div style={{ fontSize: '1.5rem', marginBottom: 8 }}>✦</div>
             <div>Ask anything about your work.</div>
-            {!keySaved && (
+            {!apiKeySaved && (
               <div style={{ marginTop: 8 }}>
                 Add your API key above to get started.
               </div>
@@ -241,7 +227,6 @@ export default function AIPanel({ open, onClose, toolContext }) {
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div style={{
             display: 'flex',
@@ -258,15 +243,12 @@ export default function AIPanel({ open, onClose, toolContext }) {
           </div>
         )}
 
-        {/* Message bubbles */}
         {messages.map((msg, i) => (
           <div
             key={i}
             style={{
               display: 'flex',
-              justifyContent: msg.role === 'user'
-                ? 'flex-end'
-                : 'flex-start',
+              justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
             }}
           >
             <div style={{
@@ -278,9 +260,7 @@ export default function AIPanel({ open, onClose, toolContext }) {
               background: msg.role === 'user'
                 ? 'var(--accent-primary)'
                 : 'var(--bg-secondary)',
-              color: msg.role === 'user'
-                ? '#ffffff'
-                : 'var(--text-primary)',
+              color: msg.role === 'user' ? '#ffffff' : 'var(--text-primary)',
               fontSize: '0.8125rem',
               lineHeight: 1.6,
               whiteSpace: 'pre-wrap',
@@ -291,7 +271,6 @@ export default function AIPanel({ open, onClose, toolContext }) {
           </div>
         ))}
 
-        {/* Loading indicator */}
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
             <div style={{
@@ -334,9 +313,7 @@ export default function AIPanel({ open, onClose, toolContext }) {
 }
 
 // --- CHANGE LOG ---
-// [11 Jun 2026] CREATED: Initial tool template
-// REASON: AI panel with user-owned API key model —
-//         key stored in localStorage, never transmitted
-//         to ForgeYours servers. Tool context makes AI
-//         relevant to what the user is actually doing.
+// [11 Jun 2026] CREATED: Initial AI panel
+// [11 Jun 2026] FIXED: renamed keysaved to apiKeySaved —
+//               inconsistent casing caused build failure
 // --- END CHANGE LOG ---
