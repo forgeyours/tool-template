@@ -56,7 +56,7 @@ export default function SupportButton() {
       {/* ─── MODAL ─────────────────────────────────────────── */}
       {open && (
         <div
-          style={{
+                    style={{
             position: 'fixed',
             inset: 0,
             zIndex: 2000,
@@ -65,7 +65,9 @@ export default function SupportButton() {
             alignItems: 'center',
             justifyContent: 'center',
             padding: 16,
+            paddingTop: 68,
           }}
+
           onClick={() => setOpen(false)}
         >
           <div
